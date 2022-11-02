@@ -9,6 +9,7 @@ void main() => runApp(
               'Hello world',
               style: TextStyle(
                 color: Colors.white,
+                fontSize: 20.0,
               ),
             ),
           ),
