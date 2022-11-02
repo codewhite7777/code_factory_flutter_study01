@@ -22,7 +22,7 @@ class MySplash_Screen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Color(0xFFF99231),
+      backgroundColor: const Color(0xFFF99231),
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
