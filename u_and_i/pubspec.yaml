@@ -91,3 +91,14 @@ flutter:
   #
   # For details regarding fonts from package dependencies,
   # see https://flutter.dev/custom-fonts/#from-packages
+  fonts:
+    - family: sunflower
+      fonts:
+        - asset: asset/font/Sunflower-Bold.ttf
+          weight: 700
+        - asset: asset/font/Sunflower-Light.ttf
+        - asset: asset/font/Sunflower-Medium.ttf
+          weight: 500
+    - family: parisienne
+      fonts:
+        - asset: asset/font/Parisienne-Regular.ttf
