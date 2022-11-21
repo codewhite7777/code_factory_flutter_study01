@@ -1,6 +1,7 @@
 import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:random_number_generator/constant/color.dart';
+import 'package:random_number_generator/screen/settings_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({Key? key}) : super(key: key);
@@ -11,7 +12,7 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   List<int> numList = [123, 456, 789];
-  int maxNumber = 1000;
+  int settingNumber = 1000;
 
   @override
   Widget build(BuildContext context) {
@@ -23,9 +24,14 @@ class _HomeScreenState extends State<HomeScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const _Header(),
+              _Header(
+                settingNumber: settingNumber,
+                onSettingPop: onSettingSave,
+              ),
               _Body(numList: numList),
-              _Fotter(maxNumber: maxNumber, onPressed: onRandomNumberGenerate),
+              _Fotter(
+                onPressed: onRandomNumberGenerate,
+              ),
             ],
           ),
         ),
@@ -36,17 +42,36 @@ class _HomeScreenState extends State<HomeScreen> {
   void onRandomNumberGenerate() {
     Set<int> generateNumber = {};
     while (generateNumber.length != 3) {
-      final int newNumber = Random().nextInt(maxNumber);
+      final int newNumber = Random().nextInt(settingNumber);
       generateNumber.add(newNumber);
     }
     setState(() {
       numList = generateNumber.toList();
     });
   }
+
+  void onSettingSave() async {
+    final int? result = await Navigator.of(context).push<int>(
+      MaterialPageRoute(
+        builder: (BuildContext context) => SettingsScreen(
+          settingNumber: settingNumber.toDouble(),
+        ),
+      ),
+    );
+    if (result != null) {
+      setState(() {
+        settingNumber = result;
+      });
+    }
+  }
 }
 
 class _Header extends StatelessWidget {
-  const _Header({Key? key}) : super(key: key);
+  int settingNumber;
+  final VoidCallback onSettingPop;
+
+  _Header({required this.settingNumber, required this.onSettingPop, Key? key})
+      : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -63,7 +88,7 @@ class _Header extends StatelessWidget {
         ),
         IconButton(
           color: RED_COLOR,
-          onPressed: () {},
+          onPressed: onSettingPop,
           icon: const Icon(Icons.settings),
         ),
       ],
@@ -110,11 +135,9 @@ class _Body extends StatelessWidget {
 }
 
 class _Fotter extends StatelessWidget {
-  final int maxNumber;
   final VoidCallback onPressed;
 
-  const _Fotter({required this.maxNumber, required this.onPressed, Key? key})
-      : super(key: key);
+  const _Fotter({required this.onPressed, Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
