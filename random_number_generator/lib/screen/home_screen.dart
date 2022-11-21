@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:random_number_generator/constant/color.dart';
 
@@ -10,6 +12,7 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   List<int> numList = [123, 456, 789];
+  int maxNumber = 1000;
 
   @override
   Widget build(BuildContext context) {
@@ -75,7 +78,14 @@ class _HomeScreenState extends State<HomeScreen> {
                         backgroundColor: RED_COLOR,
                       ),
                       onPressed: () {
-                        debugPrint('click');
+                        Set<int> generateNumber = {};
+                        while (generateNumber.length != 3) {
+                          final int newNumber = Random().nextInt(maxNumber);
+                          generateNumber.add(newNumber);
+                        }
+                        setState(() {
+                          numList = generateNumber.toList();
+                        });
                       },
                       child: const Text('생성하기'),
                     ),
