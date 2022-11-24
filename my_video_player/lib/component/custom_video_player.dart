@@ -57,7 +57,14 @@ class _CustomVideoPlayerState extends State<CustomVideoPlayer> {
     );
   }
 
-  void onReversePressed() {}
+  void onReversePressed() {
+    final currentPosition = videoController!.value.position;
+    Duration position = const Duration();
+    if (currentPosition.inSeconds > 3) {
+      position = currentPosition - const Duration(seconds: 3);
+    }
+    videoController!.seekTo(position);
+  }
 
   void onPlayPressed() {
     setState(() {
@@ -69,7 +76,16 @@ class _CustomVideoPlayerState extends State<CustomVideoPlayer> {
     });
   }
 
-  void onForwardPressed() {}
+  void onForwardPressed() {
+    final maxPosition = videoController!.value.duration;
+    final currentPosition = videoController!.value.position;
+    Duration position = currentPosition;
+    if ((maxPosition - const Duration(seconds: 3)).inSeconds >
+        currentPosition.inSeconds) {
+      position = currentPosition + const Duration(seconds: 3);
+    }
+    videoController!.seekTo(position);
+  }
 }
 
 class _Controls extends StatelessWidget {
