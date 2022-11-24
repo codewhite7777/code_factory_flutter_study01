@@ -1,28 +1,60 @@
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:my_video_player/component/custom_video_player.dart';
 
-class HomeScreen extends StatelessWidget {
+class HomeScreen extends StatefulWidget {
   const HomeScreen({Key? key}) : super(key: key);
+
+  @override
+  State<HomeScreen> createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends State<HomeScreen> {
+  XFile? video;
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: SafeArea(
-        child: Container(
-          width: MediaQuery.of(context).size.width,
-          decoration: getBoxDecoration(),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: const [
-              _Logo(),
-              SizedBox(
-                height: 30.0,
-              ),
-              _AppName(),
-            ],
-          ),
-        ),
+        child: (video == null) ? renderEmpty() : renderVideo(),
       ),
     );
+  }
+
+  Widget renderEmpty() {
+    return Container(
+      width: MediaQuery.of(context).size.width,
+      decoration: getBoxDecoration(),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          _Logo(onTap: onLogoTap),
+          const SizedBox(
+            height: 30.0,
+          ),
+          const _AppName(),
+        ],
+      ),
+    );
+  }
+
+  Widget renderVideo() {
+    return Center(
+      child: CustomVideoPlayer(
+        video: video!,
+      ),
+    );
+  }
+
+  void onLogoTap() async {
+    final video = await ImagePicker().pickVideo(source: ImageSource.gallery);
+    if (video != null) {
+      setState(() {
+        this.video = video;
+        debugPrint('OK');
+      });
+    }
+    return;
   }
 
   BoxDecoration getBoxDecoration() {
@@ -40,24 +72,30 @@ class HomeScreen extends StatelessWidget {
 }
 
 class _Logo extends StatelessWidget {
-  const _Logo({Key? key}) : super(key: key);
+  final VoidCallback onTap;
+
+  const _Logo({required this.onTap, Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    return Image.asset('asset/image/logo.png');
+    return GestureDetector(
+      onTap: onTap,
+      child: Image.asset('asset/image/logo.png'),
+    );
   }
 }
 
 class _AppName extends StatelessWidget {
+  final TextStyle textStyle = const TextStyle(
+    color: Colors.white,
+    fontSize: 30.0,
+    fontWeight: FontWeight.w400,
+  );
+
   const _AppName({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    TextStyle textStyle = const TextStyle(
-      color: Colors.white,
-      fontSize: 30.0,
-      fontWeight: FontWeight.w400,
-    );
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
@@ -68,7 +106,7 @@ class _AppName extends StatelessWidget {
         Text(
           'PLAYER',
           style: textStyle.copyWith(
-            fontWeight: FontWeight.bold,
+            fontWeight: FontWeight.w700,
           ),
         ),
       ],
