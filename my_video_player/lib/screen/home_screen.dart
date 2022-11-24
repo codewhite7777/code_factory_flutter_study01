@@ -28,7 +28,7 @@ class _HomeScreenState extends State<HomeScreen> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          _Logo(onTap: onLogoTap),
+          _Logo(onTap: onNewVideoPressed),
           const SizedBox(
             height: 30.0,
           ),
@@ -41,17 +41,17 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget renderVideo() {
     return Center(
       child: CustomVideoPlayer(
+        onNewvideoPressed: onNewVideoPressed,
         video: video!,
       ),
     );
   }
 
-  void onLogoTap() async {
+  void onNewVideoPressed() async {
     final video = await ImagePicker().pickVideo(source: ImageSource.gallery);
     if (video != null) {
       setState(() {
         this.video = video;
-        debugPrint('OK');
       });
     }
     return;

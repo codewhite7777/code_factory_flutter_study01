@@ -5,8 +5,11 @@ import 'package:video_player/video_player.dart';
 
 class CustomVideoPlayer extends StatefulWidget {
   final XFile video;
+  final VoidCallback onNewvideoPressed;
 
-  const CustomVideoPlayer({Key? key, required this.video}) : super(key: key);
+  const CustomVideoPlayer(
+      {Key? key, required this.video, required this.onNewvideoPressed})
+      : super(key: key);
 
   @override
   State<CustomVideoPlayer> createState() => _CustomVideoPlayerState();
@@ -14,6 +17,8 @@ class CustomVideoPlayer extends StatefulWidget {
 
 class _CustomVideoPlayerState extends State<CustomVideoPlayer> {
   VideoPlayerController? videoController;
+  Duration currentPosition = const Duration();
+  bool showControls = false;
 
   @override
   void initState() {
@@ -21,10 +26,22 @@ class _CustomVideoPlayerState extends State<CustomVideoPlayer> {
     initializeController();
   }
 
+  @override
+  void didUpdateWidget(covariant CustomVideoPlayer oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.video.path != widget.video.path) initializeController();
+  }
+
   initializeController() async {
+    currentPosition = const Duration();
     videoController = VideoPlayerController.file(File(widget.video.path));
     await videoController!.initialize();
-    setState(() {});
+    videoController!.addListener(() async {
+      final currentPosition = videoController!.value.position;
+      setState(() {
+        this.currentPosition = currentPosition;
+      });
+    });
   }
 
   @override
@@ -34,27 +51,45 @@ class _CustomVideoPlayerState extends State<CustomVideoPlayer> {
     }
     return AspectRatio(
       aspectRatio: videoController!.value.aspectRatio,
-      child: Stack(
-        children: [
-          VideoPlayer(videoController!),
-          _Controls(
-            onForwardPressed: onForwardPressed,
-            onPlayPressed: onPlayPressed,
-            onReversePressed: onReversePressed,
-            isPlaying: videoController!.value.isPlaying,
-          ),
-          Positioned(
-            right: 0,
-            child: IconButton(
-              color: Colors.white,
-              iconSize: 30.0,
-              onPressed: () {},
-              icon: const Icon(Icons.photo_camera_back),
+      child: GestureDetector(
+        onTap: () {
+          setState(() {
+            showControls = !showControls;
+          });
+        },
+        child: Stack(
+          children: [
+            VideoPlayer(videoController!),
+            if (showControls)
+              _Controls(
+                onForwardPressed: onForwardPressed,
+                onPlayPressed: onPlayPressed,
+                onReversePressed: onReversePressed,
+                isPlaying: videoController!.value.isPlaying,
+              ),
+            if (showControls)
+              _NewVideo(
+                onPressed: widget.onNewvideoPressed,
+              ),
+            _SliderBottom(
+              maxPosition: videoController!.value.duration,
+              onSlideChanged: onSliderChanged,
+              currentPosition: currentPosition,
             ),
-          )
-        ],
+          ],
+        ),
       ),
     );
+  }
+
+  void onSliderChanged(double value) {
+    setState(() {
+      videoController!.seekTo(
+        Duration(
+          seconds: value.toInt(),
+        ),
+      );
+    });
   }
 
   void onReversePressed() {
@@ -106,9 +141,9 @@ class _Controls extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       color: Colors.black.withOpacity(0.5),
+      height: MediaQuery.of(context).size.height,
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           renderIconButton(
             onPressed: onReversePressed,
@@ -136,6 +171,77 @@ class _Controls extends StatelessWidget {
       color: Colors.white,
       iconSize: 30.0,
       icon: Icon(iconData),
+    );
+  }
+}
+
+class _NewVideo extends StatelessWidget {
+  final VoidCallback onPressed;
+
+  const _NewVideo({
+    Key? key,
+    required this.onPressed,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Positioned(
+      right: 0,
+      child: IconButton(
+        color: Colors.white,
+        iconSize: 30.0,
+        onPressed: onPressed,
+        icon: const Icon(Icons.photo_camera_back),
+      ),
+    );
+  }
+}
+
+class _SliderBottom extends StatelessWidget {
+  final Duration currentPosition;
+  final Duration maxPosition;
+  final ValueChanged<double> onSlideChanged;
+
+  const _SliderBottom({
+    Key? key,
+    required this.currentPosition,
+    required this.maxPosition,
+    required this.onSlideChanged,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Positioned(
+      bottom: 0,
+      right: 0,
+      left: 0,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 8.0),
+        child: Row(
+          children: [
+            Text(
+              '${currentPosition.inMinutes}:${(currentPosition.inSeconds % 60).toString().padLeft(2, '0')}',
+              style: const TextStyle(
+                color: Colors.white,
+              ),
+            ),
+            Expanded(
+              child: Slider(
+                max: maxPosition.inSeconds.toDouble(),
+                min: 0,
+                value: currentPosition.inSeconds.toDouble(),
+                onChanged: onSlideChanged,
+              ),
+            ),
+            Text(
+              '${maxPosition.inMinutes}:${(maxPosition.inSeconds % 60).toString().padLeft(2, '0')}',
+              style: const TextStyle(
+                color: Colors.white,
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }
