@@ -32,6 +32,12 @@ class _CustomVideoPlayerState extends State<CustomVideoPlayer> {
     if (oldWidget.video.path != widget.video.path) initializeController();
   }
 
+  @override
+  void  dispose(){
+    super.dispose();
+    videoController!.dispose();
+  }
+
   initializeController() async {
     currentPosition = const Duration();
     videoController = VideoPlayerController.file(File(widget.video.path));
